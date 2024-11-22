@@ -1,1 +1,1 @@
-The repository is under construction
+The repository is under construction and is expected to be live within two weeks.
