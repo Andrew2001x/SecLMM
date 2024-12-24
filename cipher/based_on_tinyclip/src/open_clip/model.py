@@ -51,8 +51,6 @@ class LayerNorm(nn.LayerNorm):
         if hidden_z is None:
             x = F.layer_norm(x, self.normalized_shape,
                              self.weight, self.bias, self.eps)
-            
-            
         else:
             assert len(self.normalized_shape) == 1
             # [TODO] weighted layer norm
@@ -66,7 +64,6 @@ class LayerNorm(nn.LayerNorm):
                 compressed_input, [normalized_shape], compressed_weight, compressed_bias, self.eps)
             x = x.new_zeros(x.shape)
             x[..., remaining_index] = normed_input.to(orig_type)
-            
 
         return x.to(orig_type)
 
@@ -102,71 +99,14 @@ class LayerNorm(nn.LayerNorm):
         return m
 
 
-#class QuickGELU(nn.Module):
-    # NOTE This is slower than nn.GELU or nn.SiLU and uses more GPU memory
- #   def forward(self, x: torch.Tensor):
-  #      return x * torch.sigmoid(1.702 * x)
-        
-
-        
-           
-def custom_softmax(input, dim=-1):
-
-    exp_input = torch.exp(input - input.max(dim=dim, keepdim=True).values)
-    
-    sum_exp = exp_input.sum(dim=dim, keepdim=True)
-    
-    return exp_input / sum_exp
-
-
 class QuickGELU(nn.Module):
-    def __init__(self):
-        super(QuickGELU, self).__init__()
-
+    # NOTE This is slower than nn.GELU or nn.SiLU and uses more GPU memory
     def forward(self, x: torch.Tensor):
-        # 计算中间变量
-        raw_x = x
-        x = 1.702 * x
-        
-        # 设置各个区间的条件
-        b0 = x < -7
-        b1 = x > -2.2
-        b2 = b0 ^ b1 ^ True
-        b10 = x < 0
-        b100 = x >= 0
-        b11 = b10 & b1
-        b3 = x < 2.2
-        b12 = b3 & b100
-        b4 = x > 7
-        b5 = b3 ^ b4 ^ True
-        
-        # 定义系数
-        a_coeffs = torch.tensor([0.04206364, 0.27668905, 0.50378299])
-        b_coeffs = torch.tensor([3.86706425e-04, 9.02375527e-03, 8.02087975e-02, 
-                                 3.25062059e-01, 5.13221872e-01])
-
-        # 计算分段函数
-        x2 = torch.square(x)
-        x3 = x * x2
-        x4 = torch.square(x2)
-        
-        seg1 = b_coeffs[0] * x4 + b_coeffs[1] * x3 + b_coeffs[2] * x2 + b_coeffs[3] * x + b_coeffs[4]
-        seg2 = a_coeffs[0] * x2 + a_coeffs[1] * x + a_coeffs[2]
-        seg2f = a_coeffs[0] * x2 + a_coeffs[1] * (-x) + a_coeffs[2]
-        seg1f = b_coeffs[0] * x4 + b_coeffs[1] * (-x3) + b_coeffs[2] * x2 + b_coeffs[3] * (-x) + b_coeffs[4]
-        seg3 = 1
-        seg4 = 1 - seg2f
-        seg5 = 1 - seg1f
-        
-        # 最终输出
-        ret = b2 * seg1 + b11 * seg2 + b12 * seg4 + b5 * seg5 + b4 * seg3
-        
-        return raw_x * ret
-
+        return x * torch.sigmoid(1.702 * x)
 
 
 class Mlp(nn.Module):
-    def __init__(self, d_model, mlp_width, act_layer=QuickGELU, scale_fc=False):
+    def __init__(self, d_model, mlp_width, act_layer=nn.GELU, scale_fc=False):
         super().__init__()
         self.d_model = d_model
         self.mlp_width = mlp_width
@@ -271,7 +211,7 @@ class ResidualAttentionBlock(nn.Module):
             d_model: int,
             n_head: int,
             mlp_ratio: float = 4.0,
-            act_layer: Callable = QuickGELU,
+            act_layer: Callable = nn.GELU,
             scale_cosine_attn: bool = False,
             scale_heads: bool = False,
             scale_attn: bool = False,
@@ -327,8 +267,7 @@ class ResidualAttentionBlock(nn.Module):
             sim = q @ k.transpose(1, 2)
             if attn_mask is not None:
                 sim += attn_mask
-            #sim = torch.softmax(sim, -1)
-            sim = custom_softmax(sim, -1)
+            sim = torch.softmax(sim, -1)
             # (batch_size * n_head, length, head_dim)
             out = sim @ v
             if head_z is not None:
@@ -402,7 +341,7 @@ class ResidualAttentionBlock(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(self, width: int, layers: int, heads: int, mlp_ratio: float = 4.0,
-                 act_layer: Callable = QuickGELU):
+                 act_layer: Callable = nn.GELU):
         super().__init__()
         self.width = width
         self.layers = layers
@@ -510,7 +449,7 @@ class VisualTransformer(nn.Module):
             heads: int,
             mlp_ratio: float,
             output_dim: int,
-            act_layer: Callable = QuickGELU,
+            act_layer: Callable = nn.GELU,
             teacher_width: int = -1,
     ):
         super().__init__()
@@ -660,7 +599,7 @@ class ImageEncoder(nn.Module):
                  l0_module_image=False,
                  mask_cfg=None):
         super().__init__()
-        act_layer = QuickGELU if quick_gelu else QuickGELU
+        act_layer = QuickGELU if quick_gelu else nn.GELU
 
         if vision_cfg.timm_model_name:
             self.visual = TimmModel(
@@ -671,7 +610,7 @@ class ImageEncoder(nn.Module):
                 embed_dim=embed_dim,
                 image_size=vision_cfg.image_size
             )
-            act_layer = QuickGELU  # so that text transformer doesn't use QuickGELU w/ timm models
+            act_layer = nn.GELU  # so that text transformer doesn't use QuickGELU w/ timm models
         elif isinstance(vision_cfg.layers, (tuple, list)):
             vision_heads = vision_cfg.width * 32 // vision_cfg.head_width
             self.visual = ModifiedResNet(
@@ -745,7 +684,7 @@ class TextEncoder(nn.Module):
                  l0_module_text, mask_cfg=None):
         super().__init__()
 
-        act_layer = QuickGELU if quick_gelu else QuickGELU
+        act_layer = QuickGELU if quick_gelu else nn.GELU
         self.context_length = text_cfg.context_length
 
         if text_cfg.layers > 0:
