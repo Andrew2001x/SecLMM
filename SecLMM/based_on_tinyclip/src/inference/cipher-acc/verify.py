@@ -65,9 +65,8 @@ print(classification_report(y_true, y_pred, target_names=labels, digits=4))
 print("CIFAR-10 Accuracy:", accuracy_10)
 
 if accuracy_10 > 0.9:
-    # Load CIFAR-100 test dataset
-    cifar_100_test = load_dataset('out1', split='test')
-    labels = cifar_100_test.features['fine_label'].names
+    cifar_10_test = load_dataset('tiny-imagenet', split='validation')
+    labels = cifar_10_test.features['label'].names
     label_id_dict = dict(zip(labels, range(len(labels))))
     id_label_dict = dict(zip(range(len(labels)), labels))
 
@@ -80,26 +79,22 @@ if accuracy_10 > 0.9:
     start = 0
     end = batch_size
 
-    while start < len(cifar_100_test):
-        sample = cifar_100_test[start:end]
-        img_list, label_id_list = sample['img'], sample['fine_label']
-
-        # Collect true labels
+    while start < len(cifar_10_test):
+        sample = cifar_10_test[start:end]
+        img_list, label_id_list = sample['image'], sample['label']
+    
         y_true.extend([id_label_dict[label_id] for label_id in label_id_list])
-
-        # Get predictions
+    
         y_pred.extend(get_image_predict_label(images=img_list))
-
-        # Update batch indices
+    
         start = end
         end += batch_size
         print(start, end)
 
-    # Print classification report for CIFAR-100 and get accuracy from it
     report_100 = classification_report(y_true, y_pred, target_names=labels, digits=4, output_dict=True)
     accuracy_100 = report_100['accuracy']
-    print("CIFAR-100 Classification Report:")
+    print("tiny-imagenet Classification Report:")
     print(classification_report(y_true, y_pred, target_names=labels, digits=4))
-    print("CIFAR-100 Accuracy:", accuracy_100)
+    print("tiny-imagenet Accuracy:", accuracy_100)
 else:
     print("verification failure")
