@@ -24,6 +24,7 @@ import requests
 from PIL import Image
 from sklearn.metrics import matthews_corrcoef
 from transformers.image_processing_utils import BatchFeature
+import ast
 
 def classifier(input_ids, attention_mask, pixel_values, params):
     config = CLIPConfig()
@@ -54,12 +55,23 @@ spu = sf.SPU(conf)
 
 alice, dave = sf.PYU('alice'), sf.PYU('dave')
 def get_token_ids1():
-    i=jnp.array([[49406,320,1125,539,320,16451,49407],[49406,320,1125,539,320,25258,49407],[49406,320,1125,539,320,3329,49407],[49406,320,1125,539,320,2368,49407],[49406,320,1125,539,320,8700,49407],[49406,320,1125,539,320,1929,49407],[49406,320,1125,539,320,11438,49407],[49406,320,1125,539,320,4558,49407],[49406,320,1125,539,320,1158,49407],[49406,320,1125,539,320,4629,49407]])
-    return i
+    with open('prompt_cifar10.txt', 'r') as file:
+        content = file.read()
+
+    prompt= np.array(ast.literal_eval(content), dtype=int)
+    prompt=jnp.array(prompt)
+    return prompt
 def get_token_ids2():
-    a=jnp.array([[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1],[1,1,1,1,1,1,1]]
-)
-    return a
+    with open('mask_cifar10.txt', 'r') as file:
+        content = file.read()
+
+    mask= np.array(ast.literal_eval(content), dtype=int)
+    mask=jnp.array(mask)
+    return mask
+
+mask= np.array(ast.literal_eval(m), dtype=int)
+mask=jnp.array(mask)
+    return mask
 def get_token_ids3():
     cifar_10_test = load_dataset('out', split='test')
     images = [_['img'] for _ in cifar_10_test.select(range(10))]

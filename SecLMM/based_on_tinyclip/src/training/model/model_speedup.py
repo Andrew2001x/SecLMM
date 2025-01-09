@@ -124,11 +124,10 @@ class QuickGELU(nn.Module):
         super(QuickGELU, self).__init__()
 
     def forward(self, x: torch.Tensor):
-        # 计算中间变量
+
         raw_x = x
         x = 1.702 * x
-        
-        # 设置各个区间的条件
+
         b0 = x < -7
         b1 = x > -2.2
         b2 = b0 ^ b1 ^ True
@@ -140,12 +139,12 @@ class QuickGELU(nn.Module):
         b4 = x > 7
         b5 = b3 ^ b4 ^ True
         
-        # 定义系数
+
         a_coeffs = torch.tensor([0.04206364, 0.27668905, 0.50378299])
         b_coeffs = torch.tensor([3.86706425e-04, 9.02375527e-03, 8.02087975e-02, 
                                  3.25062059e-01, 5.13221872e-01])
 
-        # 计算分段函数
+
         x2 = torch.square(x)
         x3 = x * x2
         x4 = torch.square(x2)
@@ -158,7 +157,7 @@ class QuickGELU(nn.Module):
         seg4 = 1 - seg2f
         seg5 = 1 - seg1f
         
-        # 最终输出
+
         ret = b2 * seg1 + b11 * seg2 + b12 * seg4 + b5 * seg5 + b4 * seg3
         
         return raw_x * ret

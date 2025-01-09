@@ -53,17 +53,27 @@ conf['runtime_config']['fxpExpMode'] = 1
 spu = sf.SPU(conf)
 
 alice, dave = sf.PYU('alice'), sf.PYU('dave')
-def get_token_ids1():
-    i=jnp.array([[49406   ,320 , 1125,   539 ,  320 , 2801, 49407],
- [49406 ,  320 , 1125 ,  539  , 320 , 3970 ,49407]]
-)
-    return i
-def get_token_ids2():
-    a=jnp.array([[1, 1, 1 ,1 ,1, 1, 1],
- [1 ,1 ,1 ,1, 1, 1 ,1]]
 
-)
-    return a
+
+
+def get_token_ids1():
+    with open('prompt_fairface_gender.txt', 'r') as file:
+        content = file.read()
+
+    prompt= np.array(ast.literal_eval(content), dtype=int)
+    prompt=jnp.array(prompt)
+    return prompt
+def get_token_ids2():
+    with open('mask_fairface_gender.txt', 'r') as file:
+        content = file.read()
+
+    mask= np.array(ast.literal_eval(content), dtype=int)
+    mask=jnp.array(mask)
+    return mask
+
+
+
+
 def get_token_ids3():
     cifar_10_test = load_dataset('fairface', split='validation')
     images = [_['image'] for _ in cifar_10_test.select(range(50))]

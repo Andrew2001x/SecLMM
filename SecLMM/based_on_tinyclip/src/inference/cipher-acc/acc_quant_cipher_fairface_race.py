@@ -54,29 +54,19 @@ spu = sf.SPU(conf)
 
 alice, dave = sf.PYU('alice'), sf.PYU('dave')
 def get_token_ids1():
-    i=jnp.array([[49406, 320, 1125, 539, 2602, 7128, 1771, 49407, 49407],
-[49406, 320, 1125, 539, 3606, 1771, 49407, 49407, 49407],
-[49406, 320, 1125, 539, 1449, 1771, 49407, 49407, 49407],
-[49406, 320, 1125, 539, 1579, 1771, 49407, 49407, 49407],
-[49406, 320, 1125, 539, 3694, 6311, 1771, 49407, 49407],
-[49406, 320, 1125, 539, 19470, 318, 22676, 1771, 49407],
-[49406, 320, 1125, 539, 13942, 7128, 1771, 49407, 49407]]
+    with open('prompt_fairface_race.txt', 'r') as file:
+        content = file.read()
 
-)
-    return i
+    prompt= np.array(ast.literal_eval(content), dtype=int)
+    prompt=jnp.array(prompt)
+    return prompt
 def get_token_ids2():
-    a=jnp.array([[1, 1, 1, 1, 1, 1, 1, 1, 0],
-[1, 1, 1, 1, 1, 1, 1, 0, 0],
-[1, 1, 1, 1, 1, 1, 1, 0, 0],
-[1, 1, 1, 1, 1, 1, 1, 0, 0],
-[1, 1, 1, 1, 1, 1, 1, 1, 0],
-[1, 1, 1, 1, 1, 1, 1, 1, 1],
-[1, 1, 1, 1, 1, 1, 1, 1, 0]]
+    with open('mask_fairface_race.txt', 'r') as file:
+        content = file.read()
 
-
-
-)
-    return a
+    mask= np.array(ast.literal_eval(content), dtype=int)
+    mask=jnp.array(mask)
+    return mask
 def get_token_ids3():
     cifar_10_test = load_dataset('fairface', split='validation')
     images = [_['image'] for _ in cifar_10_test.select(range(50))]
