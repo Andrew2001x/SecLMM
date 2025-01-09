@@ -102,4 +102,4 @@ if accuracy_10 > 0.9:
     print(classification_report(y_true, y_pred, target_names=labels, digits=4))
     print("CIFAR-100 Accuracy:", accuracy_100)
 else:
-    print("验证失败")
+    print("verification failure")
