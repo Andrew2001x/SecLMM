@@ -7,7 +7,7 @@ from tqdm import tqdm
 import time
 
 # Load dataset
-cifar_10_test = load_dataset('out', split='test')
+cifar_10_test = load_dataset('cifar10', split='test')
 labels = cifar_10_test.features['label'].names
 label_id_dict = dict(zip(labels, range(len(labels))))
 id_label_dict = dict(zip(range(len(labels)), labels))
@@ -16,8 +16,8 @@ id_label_dict = dict(zip(range(len(labels)), labels))
 prompt = [f"a photo of a {label}" for label in labels]
 
 # Load model and processor
-model = CLIPModel.from_pretrained("s")
-processor = AutoProcessor.from_pretrained("s")
+model = CLIPModel.from_pretrained("clip")
+processor = AutoProcessor.from_pretrained("clip")
 
 # Ensure model is in evaluation mode
 model.eval()
@@ -65,7 +65,7 @@ print(classification_report(y_true, y_pred, target_names=labels, digits=4))
 print("CIFAR-10 Accuracy:", accuracy_10)
 
 if accuracy_10 > 0.9:
-    cifar_10_test = load_dataset('tiny-imagenet', split='validation')
+    cifar_10_test = load_dataset('tinyimagenet', split='validation')
     labels = cifar_10_test.features['label'].names
     label_id_dict = dict(zip(labels, range(len(labels))))
     id_label_dict = dict(zip(range(len(labels)), labels))
