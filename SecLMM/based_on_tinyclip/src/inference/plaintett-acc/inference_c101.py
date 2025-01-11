@@ -23,28 +23,29 @@ torch.backends.cudnn.benchmark = False
 
 # 加载模型和变换
 arch = 'TinyCLIP-ViT-39M-16-Text-19M'
-checkpoint_path = '/jty/zhangwang/Azhangwang/MQBench/dist/mo/yuanshi.pt'
 
-model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
-##model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='YFCC15M')
+##model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='', cache_dir=None)
+model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/epoch_18_iter_3324.pt')
+#/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt
+
 
 # 确保模型处于推理模式
 model.eval()
-dataset = load_dataset('out2', split='validation')  # 这里加载 CIFAR-10 测试集
-#dataset = dataset.select(range(600))  
-labels = dataset.features['label'].names
-prompt = [f"a photo of a {label}" for label in labels]
 
 # 设置文本描述
 tokenizer = open_clip.get_tokenizer(arch)
+labels = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+prompt = [f"a photo of a {label}" for label in labels]
 
 # 创建标签字典
 label_id_dict = {label: idx for idx, label in enumerate(labels)}
 id_label_dict = {idx: label for idx, label in enumerate(labels)}
 
 # 加载数据集
-img_list = dataset['image']  # 图像字段
+dataset = load_dataset('out', split='test')  # 这里加载 CIFAR-10 测试集
+img_list = dataset['img']  # 图像字段
 label_id_list = dataset['label']  # 标签字段
+#dataset = dataset.select(range(300))  # 选取前1000条数据
 
 # 定义批量预测函数
 def get_image_predict_label(images):
@@ -72,19 +73,18 @@ def get_image_predict_label(images):
         return [id_label_dict[label_id.item()] for label_id in predicted_label_index]
 
 # 初始化实际标签和预测标签的列表
-# 初始化实际标签和预测标签的列表
 y_true = []
 y_pred = []
 
 # 设置批处理大小
 batch_size = 300
-total_samples = len(dataset)
+start = 0
+end = batch_size
 
 # 遍历数据集并进行批量推理
-for start in tqdm(range(0, total_samples, batch_size), desc="Processing batches"):
-    end = min(start + batch_size, total_samples)  # 确保不会超出数据集的范围
+while start < len(dataset):
     sample = dataset[start:end]
-    img_list_batch = sample['image']
+    img_list_batch = sample['img']
     label_id_list_batch = sample['label']
     
     # 收集实际标签
@@ -92,6 +92,11 @@ for start in tqdm(range(0, total_samples, batch_size), desc="Processing batches"
     
     # 获取预测标签
     y_pred.extend(get_image_predict_label(images=img_list_batch))
+    
+    # 更新批次索引
+    start = end
+    end += batch_size
+    print(f"Processing batch: {start} - {end}")
 
 # 打印分类报告
 print(classification_report(y_true, y_pred, target_names=labels, digits=4))

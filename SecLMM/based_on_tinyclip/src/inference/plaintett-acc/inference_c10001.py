@@ -25,7 +25,7 @@ torch.backends.cudnn.benchmark = False
 arch = 'TinyCLIP-ViT-39M-16-Text-19M'
 checkpoint_path = '/jty/zhangwang/Azhangwang/MQBench/dist/mo/yuanshi.pt'
 
-model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
+model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/epoch_18_iter_3324.pt')
 ##model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='YFCC15M')
 
 # 确保模型处于推理模式

@@ -54,14 +54,14 @@ spu = sf.SPU(conf)
 
 alice, dave = sf.PYU('alice'), sf.PYU('dave')
 def get_token_ids1():
-    with open('prompt_fairface_age.txt', 'r') as file:
+    with open('data/prompt_fairface_age.txt', 'r') as file:
         content = file.read()
 
     prompt= np.array(ast.literal_eval(content), dtype=int)
     prompt=jnp.array(prompt)
     return prompt
 def get_token_ids2():
-    with open('mask_fairface_age.txt', 'r') as file:
+    with open('data/mask_fairface_age.txt', 'r') as file:
         content = file.read()
 
     mask= np.array(ast.literal_eval(content), dtype=int)

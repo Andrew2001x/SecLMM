@@ -23,10 +23,9 @@ torch.backends.cudnn.benchmark = False
 
 # 加载模型和变换
 arch = 'TinyCLIP-ViT-39M-16-Text-19M'
-checkpoint_path = '/jty/zhangwang/Azhangwang/MQBench/dist/mo/yuanshi.pt'
 
 ##model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='', cache_dir=None)
-model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/epoch_18_iter_3324.pt')
+model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
 #/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt
 
 
@@ -46,7 +45,7 @@ id_label_dict = {idx: label for idx, label in enumerate(labels)}
 dataset = load_dataset('out', split='test')  # 这里加载 CIFAR-10 测试集
 img_list = dataset['img']  # 图像字段
 label_id_list = dataset['label']  # 标签字段
-dataset = dataset.select(range(300))  # 选取前1000条数据
+#dataset = dataset.select(range(300))  # 选取前1000条数据
 
 # 定义批量预测函数
 def get_image_predict_label(images):
