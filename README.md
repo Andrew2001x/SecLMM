@@ -9,3 +9,6 @@ SecLMM has the following salient features:
 * SecLMM preserves inference accuracy comparable to native design. It optimizes unreasonably computational overhead and opens up the possibility of deploying secure LMM-based inference on resource-constrained servers.
  
 * SecLMM can provide guaranteed security against untrusted service providers maliciously delivering incorrect inference results. 	
+
+
+
