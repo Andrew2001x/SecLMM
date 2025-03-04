@@ -1,4 +1,4 @@
-cd download
+cd download 
 echo "Running cifar10.py..."
 python cifar10.py
 echo "Running cifar100.py..."
