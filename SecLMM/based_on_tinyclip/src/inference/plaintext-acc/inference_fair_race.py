@@ -26,10 +26,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 加载模型和变换
 arch = 'TinyCLIP-ViT-39M-16-Text-19M'
-checkpoint_path = '/jty/zhangwang/Azhangwang/MQBench/dist/mo/epoch_20_iter_664.pt'
+checkpoint_path = '/na/mq/dist/mo/epoch_20_iter_664.pt'
 
 # 创建模型并转移到 GPU    #epoch_20_iter_664.pt                    #TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt
-model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/epoch_20_iter_664.pt')
+model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/na/mq/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
 model.to(device)  # 将模型移动到GPU
 
 # 确保模型处于推理模式

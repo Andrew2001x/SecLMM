@@ -25,8 +25,8 @@ torch.backends.cudnn.benchmark = False
 arch = 'TinyCLIP-ViT-39M-16-Text-19M'
 
 ##model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='', cache_dir=None)
-model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
-#/jty/zhangwang/Azhangwang/MQBench/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt
+model, _, preprocess = open_clip.create_model_and_transforms(arch, pretrained='/na/mq/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt')
+#/na/mq/dist/mo/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M.pt
 
 
 # 确保模型处于推理模式
