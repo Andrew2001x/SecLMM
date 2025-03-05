@@ -11,15 +11,15 @@ SecLMM has the following salient features:
 * SecLMM can provide guaranteed security against untrusted service providers maliciously delivering incorrect inference results. 	
 
 
-##Getting Started
-###Installation
+## Getting Started
+### Installation
 This section will guide you through setting up the experimental environment on your local machine and downloading the dataset. Please refer to the specific subsections below.
 
     git clone https://github.com/Andrew2001x/SecLMM.git
     cd SecLMM
     conda env create -n seclmm --file environmnet.yaml
 
-###Dataset
+### Dataset
 We provide four used datasets, CIFAR-10, CIFAR-100, Tiny-ImageNet and Fairface.
 
     cd datasets
