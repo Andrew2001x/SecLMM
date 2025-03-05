@@ -1,61 +1,62 @@
 from PIL import Image
-import torch
-from transformers import AutoProcessor, CLIPModel
+import requests
+from transformers import AutoProcessor, FlaxCLIPModel,CLIPConfig
 from datasets import load_dataset
-from sklearn.metrics import classification_report
-from tqdm import tqdm
-import time
+import numpy as np
+from tqdm import trange
+from typing import Any, Callable, Dict, Optional, Tuple, Union
+import jax.nn as jnn
+import flax.linen as nn
+from flax.linen.linear import Array
+import jax
+import jax.numpy as jnp
+import argparse
+import torch
+import datasets
+from datasets import load_metric
+from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
+from itertools import islice
+import jax.nn as jnn
 
-# Load dataset
+from datasets import load_dataset
+
 cifar_10_test = load_dataset('cifar10', split='test')
 labels = cifar_10_test.features['label'].names
 label_id_dict = dict(zip(labels, range(len(labels))))
 id_label_dict = dict(zip(range(len(labels)), labels))
 
-# Prepare the prompt
 prompt = [f"a photo of a {label}" for label in labels]
 
-# Load model and processor
-model = CLIPModel.from_pretrained("clip")
+model = FlaxCLIPModel.from_pretrained("clip")
 processor = AutoProcessor.from_pretrained("clip")
-
-# Ensure model is in evaluation mode
-model.eval()
-
-# Define the image prediction function
 def get_image_predict_label(images):
-    inputs = processor(text=prompt, images=images, return_tensors="pt", padding=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
+    inputs = processor(text=prompt, images=images, return_tensors="jax", padding=True)
+    outputs = model(**inputs)
     logits_per_image = outputs.logits_per_image
-    probs = torch.nn.functional.softmax(logits_per_image, dim=1)
-    label_ids = torch.argmax(probs, dim=1).tolist()
+    probs = jax.nn.softmax(logits_per_image, axis=1)
+    label_ids = jnp.argmax(probs, axis=1).tolist()
     return [id_label_dict[label_id] for label_id in label_ids]
+images = [_['img'] for _ in cifar_10_test.select(range(5))]
+test_labels = get_image_predict_label(images=images)
 
-# Initialize lists for true and predicted labels
+from sklearn.metrics import classification_report
+from tqdm import tqdm
+import time
+
 y_true = []
 y_pred = []
 
-# Define batch size
 batch_size = 300
 start = 0
 end = batch_size
-
-# Iterate through dataset in batches
 while start < len(cifar_10_test):
     sample = cifar_10_test[start:end]
     img_list, label_id_list = sample['img'], sample['label']
-    
-    # Collect true labels
     y_true.extend([id_label_dict[label_id] for label_id in label_id_list])
-    
-    # Get predictions
     y_pred.extend(get_image_predict_label(images=img_list))
-    
-    # Update batch indices
     start = end
     end += batch_size
     print(start, end)
 
-# Print classification report
 print(classification_report(y_true, y_pred, target_names=labels, digits=4))
