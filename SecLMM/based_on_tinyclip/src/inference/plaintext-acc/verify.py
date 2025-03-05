@@ -11,7 +11,7 @@ cifar_10_test = load_dataset('cifar10', split='test')
 labels = cifar_10_test.features['label'].names
 label_id_dict = dict(zip(labels, range(len(labels))))
 id_label_dict = dict(zip(range(len(labels)), labels))
-
+ 
 # Prepare the prompt
 prompt = [f"a photo of a {label}" for label in labels]
 
