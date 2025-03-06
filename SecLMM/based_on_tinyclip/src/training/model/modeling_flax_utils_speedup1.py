@@ -102,22 +102,22 @@ class LayerNorm(nn.LayerNorm):
         return m
 
 
-class QuickGELU(nn.Module):
-    # NOTE This is slower than nn.GELU or nn.SiLU and uses more GPU memory
-    def forward(self, x: torch.Tensor):
-        return x * torch.sigmoid(1.702 * x)
+def quick_gelu(x):
+    return x * jax.nn.sigmoid(1.702 * x)
         
 
         
            
-def custom_softmax(input, dim=-1):
+def hack_softmax(x):
+    x_max = jnp.max(x, axis=-1, keepdims=True)
+    x = x - x_max
 
-    exp_input = torch.exp(input - input.max(dim=dim, keepdim=True).values)
-    
-    sum_exp = exp_input.sum(dim=dim, keepdim=True)
-    
-    return exp_input / sum_exp
+    b = x > -14
+    nexp = jnp.exp(x)
 
+    divisor = jnp.sum(nexp, axis=-1,keepdims=True)
+
+    return b * (nexp / divisor)
 
 
 

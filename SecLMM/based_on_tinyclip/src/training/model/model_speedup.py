@@ -102,66 +102,57 @@ class LayerNorm(nn.LayerNorm):
         return m
 
 
-#class QuickGELU(nn.Module):
-    # NOTE This is slower than nn.GELU or nn.SiLU and uses more GPU memory
- #   def forward(self, x: torch.Tensor):
-  #      return x * torch.sigmoid(1.702 * x)
+
         
 
         
            
-def custom_softmax(input, dim=-1):
+def hack_softmax(x):
+    x_max = jnp.max(x, axis=-1, keepdims=True)
+    x = x - x_max
 
-    exp_input = torch.exp(input - input.max(dim=dim, keepdim=True).values)
-    
-    sum_exp = exp_input.sum(dim=dim, keepdim=True)
-    
-    return exp_input / sum_exp
+    b = x > -14
+    nexp = jnp.exp(x)
 
+    divisor = jnp.sum(nexp, axis=-1,keepdims=True)
 
-class QuickGELU(nn.Module):
-    def __init__(self):
-        super(QuickGELU, self).__init__()
-
-    def forward(self, x: torch.Tensor):
-
-        raw_x = x
-        x = 1.702 * x
-
-        b0 = x < -7
-        b1 = x > -2.2
-        b2 = b0 ^ b1 ^ True
-        b10 = x < 0
-        b100 = x >= 0
-        b11 = b10 & b1
-        b3 = x < 2.2
-        b12 = b3 & b100
-        b4 = x > 7
-        b5 = b3 ^ b4 ^ True
-        
-
-        a_coeffs = torch.tensor([0.04206364, 0.27668905, 0.50378299])
-        b_coeffs = torch.tensor([3.86706425e-04, 9.02375527e-03, 8.02087975e-02, 
-                                 3.25062059e-01, 5.13221872e-01])
+    return b * (nexp / divisor)
 
 
-        x2 = torch.square(x)
-        x3 = x * x2
-        x4 = torch.square(x2)
-        
-        seg1 = b_coeffs[0] * x4 + b_coeffs[1] * x3 + b_coeffs[2] * x2 + b_coeffs[3] * x + b_coeffs[4]
-        seg2 = a_coeffs[0] * x2 + a_coeffs[1] * x + a_coeffs[2]
-        seg2f = a_coeffs[0] * x2 + a_coeffs[1] * (-x) + a_coeffs[2]
-        seg1f = b_coeffs[0] * x4 + b_coeffs[1] * (-x3) + b_coeffs[2] * x2 + b_coeffs[3] * (-x) + b_coeffs[4]
-        seg3 = 1
-        seg4 = 1 - seg2f
-        seg5 = 1 - seg1f
-        
+def quick_gelu(x: jnp.ndarray):
+    raw_x = x
+    x = 1.702 * x
 
-        ret = b2 * seg1 + b11 * seg2 + b12 * seg4 + b5 * seg5 + b4 * seg3
-        
-        return raw_x * ret
+    b0 = x < -7
+    b1 = x > -2.2
+    b2 = jnp.logical_xor(b0, b1)
+    b10 = x < 0
+    b100 = x >= 0
+    b11 = jnp.logical_and(b10, b1)
+    b3 = x < 2.2
+    b12 = jnp.logical_and(b3, b100)
+    b4 = x > 7
+    b5 = jnp.logical_xor(b3, b4)
 
+    a_coeffs = jnp.array([0.04206364, 0.27668905, 0.50378299])
+    b_coeffs = jnp.array([3.86706425e-04, 9.02375527e-03, 8.02087975e-02, 
+                          3.25062059e-01, 5.13221872e-01])
+
+    x2 = jnp.square(x)
+    x3 = x * x2
+    x4 = jnp.square(x2)
+
+    seg1 = b_coeffs[0] * x4 + b_coeffs[1] * x3 + b_coeffs[2] * x2 + b_coeffs[3] * x + b_coeffs[4]
+    seg2 = a_coeffs[0] * x2 + a_coeffs[1] * x + a_coeffs[2]
+    seg2f = a_coeffs[0] * x2 + a_coeffs[1] * (-x) + a_coeffs[2]
+    seg1f = b_coeffs[0] * x4 + b_coeffs[1] * (-x3) + b_coeffs[2] * x2 + b_coeffs[3] * (-x) + b_coeffs[4]
+    seg3 = 1
+    seg4 = 1 - seg2f
+    seg5 = 1 - seg1f
+
+    ret = b2 * seg1 + b11 * seg2 + b12 * seg4 + b5 * seg5 + b4 * seg3
+
+    return raw_x * ret
 
 
 class Mlp(nn.Module):

@@ -67,32 +67,39 @@ if is_safetensors_available():
 logger = logging.get_logger(__name__)
 
 
-def quick_gelu(x):    
-    raw_x=x    
-    x= 1.702*x    
-    b0 = x < -7    
-    b1 = x > -2.2    
-    b2 = b0 ^ b1 ^ True      
-    b10= x < 0    
-    b100= x >= 0    
-    b11= b10&b1    
-    b3= x<2.2    
-    b12=b3&b100    
-    b4=x>7    
-    b5=b3^b4^True    
-    a_coeffs = jnp.array(        [0.04206364 ,0.27668905 ,0.50378299        ]    )    
-    b_coeffs = jnp.array( [3.86706425e-04 ,9.02375527e-03 ,8.02087975e-02 ,3.25062059e-01,5.13221872e-01] )    
-    x2 = jnp.square(x)    
-    x3 = jnp.multiply(x, x2)    
-    x4 = jnp.square(x2)    
-    seg1 =  b_coeffs[0] * x4 + b_coeffs[1] * x3 + b_coeffs[2] * x2 + b_coeffs[3] * x  + b_coeffs[4]    
-    seg2 =  a_coeffs[0] * x2 + a_coeffs[1] * x + a_coeffs[2]    
-    seg2f =  a_coeffs[0] * x2 + a_coeffs[1] * (-x) + a_coeffs[2]    
-    seg1f =  b_coeffs[0] * x4 + b_coeffs[1] * (-x3) + b_coeffs[2] * x2 + b_coeffs[3] * (-x)  + b_coeffs[4]    
-    seg3=  1    
-    seg4=  1-seg2f    
-    seg5=1-seg1f    
-    ret =  b2 * seg1 + b11 * seg2 +b12*seg4+b5*seg5+b4*seg3    
+def quick_gelu(x: jnp.ndarray):
+    raw_x = x
+    x = 1.702 * x
+
+    b0 = x < -7
+    b1 = x > -2.2
+    b2 = jnp.logical_xor(b0, b1)
+    b10 = x < 0
+    b100 = x >= 0
+    b11 = jnp.logical_and(b10, b1)
+    b3 = x < 2.2
+    b12 = jnp.logical_and(b3, b100)
+    b4 = x > 7
+    b5 = jnp.logical_xor(b3, b4)
+
+    a_coeffs = jnp.array([0.04206364, 0.27668905, 0.50378299])
+    b_coeffs = jnp.array([3.86706425e-04, 9.02375527e-03, 8.02087975e-02, 
+                          3.25062059e-01, 5.13221872e-01])
+
+    x2 = jnp.square(x)
+    x3 = x * x2
+    x4 = jnp.square(x2)
+
+    seg1 = b_coeffs[0] * x4 + b_coeffs[1] * x3 + b_coeffs[2] * x2 + b_coeffs[3] * x + b_coeffs[4]
+    seg2 = a_coeffs[0] * x2 + a_coeffs[1] * x + a_coeffs[2]
+    seg2f = a_coeffs[0] * x2 + a_coeffs[1] * (-x) + a_coeffs[2]
+    seg1f = b_coeffs[0] * x4 + b_coeffs[1] * (-x3) + b_coeffs[2] * x2 + b_coeffs[3] * (-x) + b_coeffs[4]
+    seg3 = 1
+    seg4 = 1 - seg2f
+    seg5 = 1 - seg1f
+
+    ret = b2 * seg1 + b11 * seg2 + b12 * seg4 + b5 * seg5 + b4 * seg3
+
     return raw_x * ret
 
 ACT2FN = {
