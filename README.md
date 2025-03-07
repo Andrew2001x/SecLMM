@@ -24,3 +24,83 @@ We provide four used datasets, CIFAR-10, CIFAR-100, Tiny-ImageNet and Fairface.
 
     cd datasets
     sh dataset_u.sh
+
+
+## Fine-tuning (10-way 5-shot fewshot learning)
+Fine-tuning includes four tasks: CIFAR10, CIFAR100, TinyImageNet, and FairFace-Age/Gender/Race. Modify the
+--task_name parameter to switch between them.
+
+    cd finetuning
+    #run SecLMM fine-tuning process, e.g. for cifar10 with gelu +softmax
+    python finetune.py --task_name cifar10  --hidden_act gelu --softmax_act softmax
+    #run SecLMM fine-tuning process, e.g. for cifar10 with gelu +approximation
+    python finetune.py --task_name cifar10  --hidden_act gelu --softmax_act quant
+    #run SecLMM fine-tuning process, e.g. for cifar10 with sig +softmax
+    python finetune.py --task_name cifar10  --hidden_act sig --softmax_act softmax
+    #run SecLMM fine-tuning process, e.g. for cifar10 with sig +approximation
+    python finetune.py --task_name cifar10  --hidden_act sig --softmax_act quant
+
+
+    
+## Inference
+Inference includes four tasks: CIFAR10, CIFAR100, TinyImageNet, and FairFace-Age/Gender/Race. Modify the
+--task_name parameter to switch between them. 
+
+    cd SecLMM/based_on_tinyclip/src/inference
+    cd plaintext-acc
+
+### zeroshot_p
+
+    cd zeroshot
+    #run SecLMM plaintext inference process, e.g. for cifar10 with gelu+softmax
+    python zeroshot_p.py --task_name cifar10  --hidden_act gelu --softmax_act softmax
+    #run SecLMM plaintext inference process, e.g. for cifar10 with gelu+approximation
+    python zeroshot_p.py --task_name cifar10  --hidden_act gelu --softmax_act quant
+    #run SecLMM plaintext inference process, e.g. for cifar10 with sig +softmax
+    python zeroshot_p.py --task_name cifar10  --hidden_act sig --softmax_act softmax
+    #run SecLMM plaintext inference process, e.g. for cifar10 with sig +approximation
+    python zeroshot_p.py --task_name cifar10  --hidden_act sig --softmax_act quant
+
+
+### fewshot_p
+
+    cd fewshot
+    #run SecLMM plaintext inference process, e.g. for cifar10 with gelu +softmax
+    python fewshot_p.py --task_name cifar10  --hidden_act gelu --softmax_act softmax
+    #run SecLMM plaintext inference process, e.g. for cifar10 with gelu+quant approximation
+    python fewshot_p.py --task_name cifar10  --hidden_act gelu --softmax_act quant
+    #run SecLMM plaintext inference process, e.g. for cifar10 with sig +softmax 
+    python fewshot_p.py --task_name cifar10  --hidden_act sig --softmax_act softmax
+    #run SecLMM plaintext inference process, e.g. for cifar10 with sig + approximation
+    python fewshot_p.py --task_name cifar10  --hidden_act sig --softmax_act quant
+
+## Benchmark
+Benchmark includes four tasks: CIFAR10, CIFAR100, TinyImageNet, and FairFace-Age/Gender/Race. Modify the
+--task_name parameter to switch between them.
+
+    cd SecLMM/based_on_tinyclip/src/benchmark
+    cd cipher-acc
+
+### zeroshot_c
+
+    cd zeroshot
+    #run SecLMM cipher inference process, e.g. for cifar10 with gelu+softmax 
+    python zeroshot_c.py --task_name cifar10  --hidden_act gelu --softmax_act softmax 
+    #run SecLMM cipher inference process, e.g. for cifar10 with gelu + approximation
+    python zeroshot_c.py --task_name cifar10  --hidden_act gelu --softmax_act quant
+    #run SecLMMcipher inference process, e.g. for cifar10 with sig +softmax
+    python zeroshot_c.py --task_name cifar10  --hidden_act sig --softmax_act softmax
+    #run SecLMM cipher inference process, e.g. for cifar10 with sig +quant approximation
+    python zeroshot_c.py --task_name cifar10  --hidden_act sig --softmax_act quant
+
+### fewshot_c
+
+    cd fewshot
+    #run SecLMM cipher inference process, e.g. for cifar10 with gelu+softmax 
+    python fewshot_c.py --task_name cifar10  --hidden_act gelu --softmax_act softmax 
+    #run SecLMM cipher inference process, e.g. for cifar10 with gelu + approximation
+    python fewshot_c.py --task_name cifar10  --hidden_act gelu --softmax_act softmax
+    #run SecLMMcipher inference process, e.g. for cifar10 with sig +softmax
+    python fewshot_c.py --task_name cifar10  --hidden_act sig --softmax_act softmax
+    #run SecLMM cipher inference process, e.g. for cifar10 with sig +quant approximation
+    python fewshot_c.py --task_name cifar10  --hidden_act sig --softmax_act quant
