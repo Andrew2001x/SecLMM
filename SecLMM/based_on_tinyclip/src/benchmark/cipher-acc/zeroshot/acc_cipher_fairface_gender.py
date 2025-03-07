@@ -3,7 +3,7 @@ from datasets import load_dataset  # For loading datasets
 import numpy as np  # For numerical operations
 from tqdm import trange  # For progress bars
 import joblib  # For saving/loading Python objects
-import secretflow as sf  # For secure multi-party computation
+import secretflow极as sf  # For secure multi-party computation
 from typing import Any, Callable, Dict, Optional, Tuple, Union  # For type hints
 import jax.nn as jnn  # JAX neural network module
 import flax.linen as nn  # Flax neural network module
@@ -33,7 +33,7 @@ def classifier(input_ids, attention_mask, pixel_values, params):
     # Get model outputs
     outputs = model(input_ids=input_ids, attention_mask=attention_mask, pixel_values=pixel_values, params=params)
     logits_per_image = outputs.logits_per_image  # Logits for each image
-    probs = jax.nn.softmax(logits_per_image, axis=1)  # Softmax probabilities
+    probs = jax.nn.softmax(log极its_per_image, axis=1)  # Softmax probabilities
     label_ids = jnp.argmax(probs, axis=1)  # Predicted label IDs
     return label_ids
 
@@ -44,7 +44,7 @@ sf.shutdown()
 sf.init(['alice', 'dave'], address='local')
 
 # Define the cluster configuration for SecretFlow
-conf = sf.utils.testing.cluster_def(parties=['alice', 'dave'])
+conf = sf.utils.testing.cluster_def(parties=['al极ice', 'dave'])
 conf['runtime_config']['protocol'] = 'SEMI2K'  # Set protocol to SEMI2K
 conf['runtime_config']['field'] = 'FM128'  # Set field to FM128
 conf['runtime_config']['enable_pphlo_profile'] = True  # Enable PPHLO profiling
@@ -63,7 +63,7 @@ alice, dave = sf.PYU('alice'), sf.PYU('dave')
 
 # Function to get token IDs from a file
 def get_token_ids1():
-    with open('data/prompt_fairface_age.txt', 'r') as file:
+    with open('prompt_mask/prompt_fairface_gender.txt', 'r') as file:
         content = file.read()
 
     prompt= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array
@@ -72,7 +72,7 @@ def get_token_ids1():
 
 # Function to get attention mask from a file
 def get_token_ids2():
-    with open('data/mask_fairface_age.txt', 'r') as file:
+    with open('prompt_mask/mask_fairface_gender.txt', 'r') as file:
         content = file.read()
 
     mask= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array
@@ -83,15 +83,15 @@ def get_token_ids2():
 def get_token_ids3():
     cifar_10_test = load_dataset('fairface', split='validation')  # Load FairFace validation dataset
     images = [_['image'] for _ in cifar_10_test.select(range(50))]  # Select first 50 images
-    processor = AutoProcessor.from_pretrained("clipq")  # Load CLIP processor
-    prompt = ['a photo of people between the ages of 0 and 2','a photo of people between the ages of 3 and 9', 'a photo of people between the ages of 10 and 19', 'a photo of people between the ages of 20 and 29', 'a photo of people between the ages of 30 and 39', 'a photo of people between the ages of 40 and 49', 'a photo of people between the ages of 50 and 59',  'a photo of people between the ages of 60 and 69','a photo of people aged 70 or older' ]  # Define prompts
+    processor = AutoProcessor.from_pretrained("clip")  # Load CLIP processor
+    prompt = ['a photo of a male', 'a photo of a female']  # Define prompts
     inputs = processor(text=prompt, images=images, return_tensors="jax", padding=True)  # Process inputs
     p = inputs.pixel_values  # Get pixel values
     return p
 
 # Function to get pre-trained CLIP model parameters
 def get_model_params():
-    pretrained_model = FlaxCLIPModel.from_pretrained("clipq")  # Load pre-trained CLIP model
+    pretrained_model = FlaxCLIPModel.from_pretrained("clip")  # Load pre-trained CLIP model
     return pretrained_model.params  # Return model parameters
 
 # Get model parameters and token IDs using PYU instances

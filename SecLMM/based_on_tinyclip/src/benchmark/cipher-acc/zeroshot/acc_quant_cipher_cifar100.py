@@ -63,7 +63,7 @@ alice, dave = sf.PYU('alice'), sf.PYU('dave')
 
 # Function to get token IDs from a file
 def get_token_ids1():
-    with open('data/prompt_cifar100.txt', 'r') as file:
+    with open('prompt_mask/prompt_cifar100.txt', 'r') as file:
         content = file.read()
 
     prompt= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array
@@ -72,7 +72,7 @@ def get_token_ids1():
 
 # Function to get attention mask from a file
 def get_token_ids2():
-    with open('data/mask_cifar100.txt', 'r') as file:
+    with open('prompt_mask/mask_cifar100.txt', 'r') as file:
         content = file.read()
 
     mask= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array

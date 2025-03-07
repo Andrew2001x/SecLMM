@@ -66,7 +66,7 @@ alice, dave = sf.PYU('alice'), sf.PYU('dave')
 
 # Define a function to load token IDs from a file
 def get_token_ids1():
-    with open('data/prompt_tinyimagenet.txt', 'r') as file:
+    with open('prompt_mask/prompt_tinyimagenet.txt', 'r') as file:
         content = file.read()
 
     # Convert the content to a NumPy array and then to a JAX array
@@ -76,7 +76,7 @@ def get_token_ids1():
 
 # Define a function to load attention masks from a file
 def get_token_ids2():
-    with open('data/mask_tinyimagenet.txt', 'r') as file:
+    with open('prompt_mask/mask_tinyimagenet.txt', 'r') as file:
         content = file.read()
 
     # Convert the content to a NumPy array and then to a JAX array

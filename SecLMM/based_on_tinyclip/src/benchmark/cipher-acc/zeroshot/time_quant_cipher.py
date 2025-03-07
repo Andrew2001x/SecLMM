@@ -23,6 +23,16 @@ import requests
 from PIL import Image
 from sklearn.metrics import matthews_corrcoef
 from transformers.image_processing_utils import BatchFeature
+import os
+
+# Get the PID of the current Python process
+pid = os.getpid()
+print(f"The PID of the current Python process is: {pid}")
+
+import time
+
+# Start timing the execution
+start = time.time()
 
 # Define the classifier function
 def classifier(input_ids, attention_mask, pixel_values, params):
@@ -66,7 +76,7 @@ alice, dave = sf.PYU('alice'), sf.PYU('dave')
 
 # Define a function to load token IDs from a file
 def get_token_ids1():
-    with open('data/prompt_fairface_gender.txt', 'r') as file:
+    with open('prompt_mask/prompt_cifar10.txt', 'r') as file:
         content = file.read()
 
     # Convert the content to a NumPy array and then to a JAX array
@@ -76,7 +86,7 @@ def get_token_ids1():
 
 # Define a function to load attention masks from a file
 def get_token_ids2():
-    with open('data/mask_fairface_gender.txt', 'r') as file:
+    with open('prompt_mask/mask_cifar10.txt', 'r') as file:
         content = file.read()
 
     # Convert the content to a NumPy array and then to a JAX array
@@ -86,14 +96,18 @@ def get_token_ids2():
 
 # Define a function to load pixel values from the dataset
 def get_token_ids3():
-    # Load the FairFace validation dataset
-    cifar_10_test = load_dataset('fairface', split='validation')
+    # Load the CIFAR-10 test dataset
+    cifar_10_test = load_dataset('cifar10', split='test')
     # Extract images from the dataset
-    images = [_['image'] for _ in cifar_10_test.select(range(50))]
+    images = [_['img'] for _ in cifar_10_test.select(range(1))]
     # Initialize the processor for the CLIP model
     processor = AutoProcessor.from_pretrained("clipq")
     # Define the text prompts
-    prompt = ['a photo of a male', 'a photo of a female']
+    prompt = [
+        'a photo of a airplane', 'a photo of a automobile', 'a photo of a bird', 'a photo of a cat',
+        'a photo of a deer', 'a photo of a dog', 'a photo of a frog', 'a photo of a horse',
+        'a photo of a ship', 'a photo of a truck'
+    ]
     # Preprocess the images and text prompts
     inputs = processor(text=prompt, images=images, return_tensors="jax", padding=True)
     # Extract the pixel values
@@ -124,3 +138,10 @@ output_token_ids = spu(classifier)(
 # Reveal the output token IDs
 outputs_ids = sf.reveal(output_token_ids)
 print(outputs_ids)
+
+# End timing the execution
+end = time.time()
+execution_time = end - start
+
+# Print the execution time
+print(execution_time)

@@ -1,7 +1,7 @@
 # Import necessary libraries
 from datasets import load_dataset  # For loading datasets
 import numpy as np  # For numerical operations
-from tqdm import trange  # For progress bars
+from极tqdm import trange  # For progress bars
 import joblib  # For saving/loading Python objects
 import secretflow as sf  # For secure multi-party computation
 from typing import Any, Callable, Dict, Optional, Tuple, Union  # For type hints
@@ -9,7 +9,7 @@ import jax.nn as jnn  # JAX neural network module
 import flax.linen as nn  # Flax neural network module
 from flax.linen.linear import Array  # For array operations in Flax
 import jax  # For JAX operations
-import jax.numpy as jnp  # JAX version of NumPy
+import jax.numpy as j极np  # JAX version of NumPy
 import argparse  # For parsing command-line arguments
 import spu.utils.distributed as ppd  # For distributed computing in SPU
 import spu.intrinsic as intrinsic  # For intrinsic functions in SPU
@@ -63,7 +63,7 @@ alice, dave = sf.PYU('alice'), sf.PYU('dave')
 
 # Function to get token IDs from a file
 def get_token_ids1():
-    with open('data/prompt_cifar10.txt', 'r') as file:
+    with open('prompt_mask/prompt_fairface_race.txt', 'r') as file:
         content = file.read()
 
     prompt= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array
@@ -72,26 +72,26 @@ def get_token_ids1():
 
 # Function to get attention mask from a file
 def get_token_ids2():
-    with open('data/mask_cifar10.txt', 'r') as file:
+    with open('prompt_mask/mask_fairface_race.txt', 'r') as file:
         content = file.read()
 
     mask= np.array(ast.literal_eval(content), dtype=int)  # Convert content to numpy array
     mask=jnp.array(mask)  # Convert to JAX array
     return mask
 
-# Function to get pixel values from the CIFAR-10 dataset
+# Function to get pixel values from the FairFace dataset
 def get_token_ids3():
-    cifar_10_test = load_dataset('cifar10', split='test')  # Load CIFAR-10 test dataset
-    images = [_['img'] for _ in cifar_10_test.select(range(50))]  # Select first 50 images
-    processor = AutoProcessor.from_pretrained("clipq")  # Load CLIP processor
-    prompt = ['a photo of a airplane', 'a photo of a automobile', 'a photo of a bird', 'a photo of a cat', 'a photo of a deer', 'a photo of a dog', 'a photo of a frog', 'a photo of a horse', 'a photo of a ship', 'a photo of a truck']  # Define prompts
+    cifar_10_test = load_dataset('fairface', split='validation')  # Load FairFace validation dataset
+    images = [_['image'] for _ in cifar_10_test.select(range(50))]  # Select first 50 images
+    processor = AutoProcessor.from_pretrained("clip")  # Load CLIP processor
+    prompt = ['a photo of East Asian group', 'a photo of Indian group', 'a photo of Black group', 'a photo of White group', 'a photo of Middle Eastern group', 'a photo of Latino_Hispanic group', 'a photo of Southeast Asian group']  # Define prompts
     inputs = processor(text=prompt, images=images, return_tensors="jax", padding=True)  # Process inputs
     p = inputs.pixel_values  # Get pixel values
     return p
 
 # Function to get pre-trained CLIP model parameters
 def get_model_params():
-    pretrained_model = FlaxCLIPModel.from_pretrained("clipq")  # Load pre-trained CLIP model
+    pretrained_model = FlaxCLIPModel.from_pretrained("clip")  # Load pre-trained CLIP model
     return pretrained_model.params  # Return model parameters
 
 # Get model parameters and token IDs using PYU instances
