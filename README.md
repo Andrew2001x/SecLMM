@@ -104,3 +104,12 @@ Benchmark includes four tasks: CIFAR10, CIFAR100, TinyImageNet, and FairFace-Age
     python fewshot_c.py --task_name cifar10  --hidden_act sig --softmax_act softmax
     #run SecLMM cipher inference process, e.g. for cifar10 with sig +quant approximation
     python fewshot_c.py --task_name cifar10  --hidden_act sig --softmax_act quant
+
+## Used Open Source Projects
+
+    This repository is built upon the following open-source projects:
+    https://github.com/wkcn/TinyCLIP
+    https://github.com/huggingface/transformers
+    https://github.com/secretflow/spu/tree/main
+
+
